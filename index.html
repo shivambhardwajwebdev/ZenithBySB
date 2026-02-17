@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH | The Future of Personalized Fashion</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CUSTOM CURSOR --- */
+        body {
+            cursor: none; /* Hide default cursor */
+            background-color: #0a0a0a;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background 0.3s;
+            mix-blend-mode: difference;
+        }
+        
+        #cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 4px;
+            background: #d4af37;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Hover effect for cursor */
+        body:hover #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #d4af37;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-mont { font-family: 'Montserrat', sans-serif; }
+
+        /* --- GOLD TEXT GRADIENT --- */
+        .text-gold {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        /* --- GLASSMORPHISM --- */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        /* --- ANIMATIONS (FIXED) --- */
+        /* Changed from clip-path to opacity/transform for better visibility reliability */
+        .reveal-text {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 1s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .reveal-hidden {
+            opacity: 0;
+            transform: translateY(50px);
+            /* Removed clip-path to prevent invisible content bugs */
+        }
+
+        /* Smooth marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Image Parallax Container */
+        .parallax-img {
+            transition: transform 0.1s linear; /* Smooth linear movement for parallax */
+            will-change: transform;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+        .loader-line {
+            width: 0%;
+            height: 2px;
+            background: #d4af37;
+            transition: width 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+
+    <div id="loader">
+        <div class="flex flex-col items-center">
+            <h1 class="text-4xl md:text-6xl font-cinzel text-white mb-4 tracking-widest">ZENITH</h1>
+            <div class="w-64 h-[1px] bg-gray-800">
+                <div class="loader-line" id="loader-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed w-full z-50 transition-all duration-300 py-6 px-6 md:px-12 flex justify-between items-center" id="navbar">
+        <a href="#" class="text-2xl md:text-3xl font-cinzel font-bold text-white tracking-widest hover-trigger" data-hover>
+            ZENITH
+        </a>
+
+        <div class="hidden md:flex items-center space-x-12 font-mont text-xs tracking-[0.2em]">
+            <a href="#philosophy" class="hover:text-gold transition-colors duration-300 hover-trigger" data-hover>PHILOSOPHY</a>
+            <a href="#features" class="hover:text-gold transition-colors duration-300 hover-trigger" data-hover>THE ALGORITHM</a>
+            <a href="#collection" class="hover:text-gold transition-colors duration-300 hover-trigger" data-hover>COLLECTION</a>
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <a href="login.html" class="hidden md:block text-xs font-mont tracking-widest hover:text-gold transition hover-trigger" data-hover>LOGIN</a>
+            <a href="login.html" class="px-6 py-2 border border-white/20 text-xs font-mont tracking-widest hover:bg-white hover:text-black transition duration-500 hover-trigger" data-hover>
+                JOIN THE ELITE
+            </a>
+        </div>
+    </nav>
+
+    <header class="relative w-full h-screen overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-black/40 z-10"></div> <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073&auto=format&fit=crop" 
+                 alt="High Fashion Model" 
+                 class="w-full h-full object-cover parallax-img" 
+                 data-speed="0.5">
+        </div>
+
+        <div class="relative z-20 text-center px-4">
+            <p class="text-gold font-mont text-xs md:text-sm tracking-[0.5em] mb-4 reveal-hidden js-reveal">PRECISION TAILORING AI</p>
+            <h1 class="text-5xl md:text-8xl lg:text-9xl font-cinzel text-white mb-6 tracking-wider leading-tight reveal-hidden js-reveal" style="transition-delay: 0.1s;">
+                BEYOND <br/> <span class="italic font-playfair text-white/90">SIZE</span>
+            </h1>
+            <p class="text-gray-300 font-mont text-sm md:text-base max-w-lg mx-auto mb-10 leading-relaxed reveal-hidden js-reveal" style="transition-delay: 0.2s;">
+                Stop wearing clothes that fit the mannequin. Start wearing clothes curated for your unique body shape, subtype, undertone, and skin shade.
+            </p>
+            
+            <a href="login.html" class="inline-block group relative px-10 py-4 overflow-hidden border border-gold reveal-hidden js-reveal hover-trigger" data-hover style="transition-delay: 0.3s;">
+                <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <span class="relative font-mont text-xs tracking-[0.2em] text-gold group-hover:text-black transition-colors duration-300">DISCOVER YOUR FIT</span>
+            </a>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce z-20">
+            <span class="text-[10px] tracking-[0.3em] text-white/50 mb-2">SCROLL</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+        </div>
+    </header>
+
+    <div class="bg-white text-black py-4 border-y border-gray-200 overflow-hidden relative z-30">
+        <div class="marquee-container">
+            <div class="marquee-content font-cinzel text-4xl md:text-6xl tracking-tighter opacity-80">
+                ZENITH &nbsp; • &nbsp; BODY SHAPE ANALYSIS &nbsp; • &nbsp; COLOR THEORY &nbsp; • &nbsp; AI STYLIST &nbsp; • &nbsp; ZENITH &nbsp; • &nbsp; BODY SHAPE ANALYSIS &nbsp; • &nbsp; COLOR THEORY &nbsp; • &nbsp; AI STYLIST &nbsp; • &nbsp;
+            </div>
+        </div>
+    </div>
+
+    <section id="philosophy" class="py-24 md:py-32 px-6 md:px-12 relative z-30 bg-[#0a0a0a]">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            
+            <div class="order-2 md:order-1">
+                <h2 class="text-4xl md:text-6xl font-playfair text-white mb-8 leading-tight reveal-hidden js-reveal">
+                    It's Not You. <br/> <span class="text-gray-500 italic">It's the Cut.</span>
+                </h2>
+                <p class="font-mont text-gray-400 leading-relaxed mb-8 reveal-hidden js-reveal">
+                    Standard sizing ignores geometry. At Zenith, we classify the human form into 5 distinct architectural shapes and 3 subtypes. Whether you are an <span class="text-white">Apple-Plump</span> or an <span class="text-white">Inverted Triangle-Skinny</span>, we find the silhouette that honors your lines.
+                </p>
+                
+                <ul class="space-y-4 font-mont text-sm tracking-wide text-gray-300 reveal-hidden js-reveal">
+                    <li class="flex items-center hover:text-gold transition hover-trigger" data-hover>
+                        <i class="fas fa-check text-gold mr-4 text-xs"></i> Apple / Round
+                    </li>
+                    <li class="flex items-center hover:text-gold transition hover-trigger" data-hover>
+                        <i class="fas fa-check text-gold mr-4 text-xs"></i> Pear / Triangle
+                    </li>
+                    <li class="flex items-center hover:text-gold transition hover-trigger" data-hover>
+                        <i class="fas fa-check text-gold mr-4 text-xs"></i> Hourglass & Rectangular
+                    </li>
+                </ul>
+            </div>
+
+            <div class="order-1 md:order-2 relative h-[600px] overflow-hidden group reveal-hidden js-reveal">
+                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition duration-500 z-10"></div>
+                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1887&auto=format&fit=crop" 
+                     alt="Diverse Body Shapes" 
+                     class="w-full h-full object-cover transform group-hover:scale-110 transition duration-1000">
+                
+                <div class="absolute bottom-8 left-8 z-20 glass p-6 max-w-xs transform translate-y-4 group-hover:translate-y-0 transition duration-500">
+                    <p class="text-[10px] text-gold tracking-widest mb-1">ANALYSIS COMPLETE</p>
+                    <p class="font-playfair text-xl italic">"Subtype: Healthy"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 bg-zinc-900 relative z-30 overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-black to-transparent opacity-50 z-0"></div>
+
+        <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                <div class="max-w-xl">
+                    <p class="text-gold font-mont text-xs tracking-[0.3em] mb-4">CHROMATIC SCIENCE</p>
+                    <h2 class="text-4xl md:text-5xl font-cinzel text-white leading-tight reveal-hidden js-reveal">
+                        21 Shades. <br/> Infinite Radiance.
+                    </h2>
+                </div>
+                <div class="hidden md:block">
+                    <a href="login.html" class="text-sm font-mont text-white border-b border-gold pb-1 hover:text-gold transition hover-trigger" data-hover>START COLOR ANALYSIS <i class="fas fa-arrow-right ml-2 text-xs"></i></a>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-10 hover:bg-white/5 transition duration-500 border-t-2 border-transparent hover:border-gold group reveal-hidden js-reveal hover-trigger" data-hover>
+                    <div class="h-12 w-12 rounded-full bg-gradient-to-br from-orange-200 to-amber-700 mb-6 border border-white/20"></div>
+                    <h3 class="text-xl font-playfair text-white mb-3">Skin Tone Mapping</h3>
+                    <p class="text-gray-400 text-sm font-mont leading-relaxed">
+                        From <span class="text-amber-100">Very Fair</span> to <span class="text-amber-900">Deep Brown</span>. We use a 21-point hex-code grid to match your exact complexion.
+                    </p>
+                </div>
+
+                <div class="glass p-10 hover:bg-white/5 transition duration-500 border-t-2 border-transparent hover:border-gold group reveal-hidden js-reveal" style="transition-delay: 0.2s;" data-hover>
+                    <div class="flex space-x-2 mb-6">
+                        <div class="h-12 w-12 rounded-full bg-blue-900/50 border border-blue-400/30"></div>
+                        <div class="h-12 w-12 rounded-full bg-yellow-900/50 border border-yellow-400/30"></div>
+                    </div>
+                    <h3 class="text-xl font-playfair text-white mb-3">Undertone Detection</h3>
+                    <p class="text-gray-400 text-sm font-mont leading-relaxed">
+                        Cool, Warm, or Neutral? We analyze your vein color and sun reaction to recommend fabrics that make you glow.
+                    </p>
+                </div>
+
+                <div class="glass p-10 hover:bg-white/5 transition duration-500 border-t-2 border-transparent hover:border-gold group reveal-hidden js-reveal" style="transition-delay: 0.4s;" data-hover>
+                    <i class="fas fa-magic text-4xl text-gold mb-6"></i>
+                    <h3 class="text-xl font-playfair text-white mb-3">The Suggestion Engine</h3>
+                    <p class="text-gray-400 text-sm font-mont leading-relaxed">
+                        Our database filters thousands of items to show you ONLY what fits your matrix. No more returns.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="collection" class="relative h-[80vh] flex items-center justify-center overflow-hidden z-30">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1976&auto=format&fit=crop" 
+                 alt="Fashion Editorial" 
+                 class="w-full h-full object-cover grayscale hover:grayscale-0 transition duration-1000 transform scale-105 parallax-img">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        </div>
+        
+        <div class="relative z-10 text-center glass-dark p-12 md:p-20 max-w-3xl mx-4 reveal-hidden js-reveal">
+            <h2 class="text-5xl md:text-7xl font-cinzel text-white mb-6">ZENITH</h2>
+            <p class="font-playfair italic text-xl text-gray-300 mb-8">
+                "Fashion is architecture: it is a matter of proportions."
+            </p>
+            <a href="login.html" class="inline-block bg-white text-black px-12 py-4 font-mont text-xs font-bold tracking-widest hover:bg-gold hover:text-white hover:bg-blue-900 transition duration-300 hover-trigger" data-hover>
+                SHOP THE COLLECTION
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-black pt-20 pb-10 px-6 md:px-12 border-t border-gray-900 relative z-30">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 mb-16">
+            <div class="md:col-span-2">
+                <h2 class="text-3xl font-cinzel text-white mb-6">ZENITH</h2>
+                <p class="text-gray-500 font-mont text-sm max-w-md leading-relaxed">
+                    The world's first e-commerce platform dedicated to body-type precision. We don't sell clothes; we sell confidence engineered for your geometry.
+                </p>
+            </div>
+            
+            <div>
+                <h4 class="text-white font-mont text-xs tracking-widest mb-6">EXPLORE</h4>
+                <ul class="space-y-4 text-gray-500 font-mont text-sm">
+                    <li><a href="#" class="hover:text-gold transition">Body Analysis</a></li>
+                    <li><a href="#" class="hover:text-gold transition">Color Theory</a></li>
+                    <li><a href="#" class="hover:text-gold transition">The Studio</a></li>
+                    <li><a href="#" class="hover:text-gold transition">Journal</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-mont text-xs tracking-widest mb-6">ACCOUNT</h4>
+                <ul class="space-y-4 text-gray-500 font-mont text-sm">
+                    <li><a href="login.html" class="hover:text-gold transition">Sign In</a></li>
+                    <li><a href="login.html" class="hover:text-gold transition">login</a></li>
+                    <li><a href="#" class="hover:text-gold transition">Order Status</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-900 text-xs text-gray-600 font-mont">
+            <p>&copy; 2025 ZENITH FASHION . All rights reserved.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fab fa-pinterest"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. LOADER ---
+        window.addEventListener('load', () => {
+            const loaderLine = document.getElementById('loader-progress');
+            const loader = document.getElementById('loader');
+            
+            // Fill line
+            loaderLine.style.width = '100%';
+            
+            // Fade out after delay
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    // Trigger entry animations immediately
+                    revealOnScroll(); 
+                }, 800);
+            }, 1500);
+        });
+
+        // --- 2. CUSTOM CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            // Dot moves instantly
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Circle moves with delay (smoothness)
+            cursor.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Hover Effect on Links
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => {
+                cursor.classList.add('hovered');
+            });
+            trigger.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hovered');
+            });
+        });
+
+        // --- 3. NAVBAR SCROLL EFFECT ---
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('glass-dark');
+                navbar.classList.remove('py-6');
+                navbar.classList.add('py-4');
+            } else {
+                navbar.classList.remove('glass-dark');
+                navbar.classList.add('py-6');
+                navbar.classList.remove('py-4');
+            }
+        });
+
+        // --- 4. SCROLL REVEAL ANIMATION (Intersection Observer) ---
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.js-reveal');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.remove('reveal-hidden');
+                        entry.target.classList.add('reveal-text');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+            reveals.forEach(element => {
+                observer.observe(element);
+            });
+        }
+        
+        // Safety initialization: Run immediately in case loader fails
+        document.addEventListener("DOMContentLoaded", revealOnScroll);
+
+        // --- 5. PARALLAX EFFECT ---
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const parallaxImages = document.querySelectorAll('.parallax-img');
+            
+            parallaxImages.forEach(img => {
+                // Determine if this is the hero image or section image to prevent overlap issues
+                const speed = 0.5;
+                // Only animate if element is in view to save performance
+                img.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

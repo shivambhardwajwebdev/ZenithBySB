@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith | Personalized Fashion </title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        zenith: {
+                            black: '#0a0a0a',
+                            gold: '#D4AF37',
+                            cream: '#F5F5F5',
+                            gray: '#262626'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom UI Enhancements */
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #D4AF37;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+            color: black;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .selection-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-card.selected {
+            border-color: #D4AF37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        
+        .selection-card.selected::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(212, 175, 55, 0.1);
+            pointer-events: none;
+        }
+
+        .loader {
+            border-top-color: #D4AF37;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Skin Tone Swatch Animation */
+        .color-swatch {
+            transition: transform 0.2s;
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        .color-swatch.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px #D4AF37;
+            z-index: 10;
+        }
+        
+        /* Fade In Animation */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+        <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <nav class="fixed w-full z-50 glass-panel border-b border-white/10 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="favicon-32x32.png">
+                <span class="font-serif text-2xl font-bold tracking-wider text-zenith-gold">ZENITH</span>
+            </div>
+            <div id="nav-actions" class="hidden">
+                <button onclick="handleLogout()" class="text-sm uppercase tracking-widest hover:text-zenith-gold transition-colors">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-container" class="flex-grow pt-24 px-4 sm:px-6 relative overflow-hidden">
+        
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10">
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-zenith-gold/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <section id="auth-view" class="max-w-md mx-auto mt-10 hidden">
+            <div class="glass-panel p-8 rounded-2xl shadow-2xl">
+                <div class="text-center mb-8">
+                    <h2 class="font-serif text-3xl mb-2" id="auth-title">Welcome to Zenith</h2>
+                    <p class="text-gray-400 text-sm">Curating your perfect aesthetic.</p>
+                </div>
+
+                <div class="flex bg-white/5 rounded-lg p-1 mb-6">
+                    <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 py-2 rounded text-sm font-medium transition-all bg-zenith-gold text-black">Login</button>
+                    <button onclick="toggleAuthMode('register')" id="tab-register" class="flex-1 py-2 rounded text-sm font-medium transition-all text-gray-400 hover:text-white">Register</button>
+                </div>
+
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Email</label>
+                        <input type="email" id="login-email" class="w-full input-field p-3 rounded-lg" placeholder="jane@example.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Password</label>
+                        <input type="password" id="login-password" class="w-full input-field p-3 rounded-lg" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" id="btn-login-submit" class="w-full btn-primary py-3 rounded-lg mt-4 flex justify-center items-center gap-2">
+                        <span>Access Account</span>
+                    </button>
+                </form>
+
+                <form id="register-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Full Name</label>
+                        <input type="text" id="reg-name" class="w-full input-field p-3 rounded-lg" placeholder="Jane Doe" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Mobile Number</label>
+                        <input type="tel" id="reg-mobile" class="w-full input-field p-3 rounded-lg" placeholder="+1 234 567 8900" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Email</label>
+                        <input type="email" id="reg-email" class="w-full input-field p-3 rounded-lg" placeholder="jane@example.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Password</label>
+                        <input type="password" id="reg-password" class="w-full input-field p-3 rounded-lg" placeholder="Create a strong password" required>
+                    </div>
+                    <div class="bg-blue-900/20 border border-blue-500/30 p-3 rounded text-xs text-blue-200">
+                        <i class="ph-fill ph-info mr-1"></i> A verification link will be sent to your email.
+                    </div>
+                    <button type="submit" id="btn-reg-submit" class="w-full btn-primary py-3 rounded-lg mt-4 flex justify-center items-center gap-2">
+                        <span>Create Account</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section id="verify-view" class="max-w-md mx-auto mt-10 hidden">
+            <div class="glass-panel p-8 rounded-2xl shadow-2xl text-center">
+                <div class="w-16 h-16 bg-zenith-gold/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="ph-duotone ph-envelope-open text-3xl text-zenith-gold"></i>
+                </div>
+                <h2 class="font-serif text-2xl mb-2">Verify Your Email</h2>
+                <p class="text-gray-400 text-sm mb-6">We've sent a link to <span id="verify-email-display" class="text-white font-medium">your email</span>.<br>Please click it to activate your account.</p>
+
+                <div class="space-y-3">
+                    <button onclick="checkVerification()" class="w-full btn-primary py-3 rounded-lg">
+                        I've Verified It
+                    </button>
+                    
+                    <button onclick="resendVerificationEmail()" id="btn-resend" class="w-full btn-secondary py-3 rounded-lg">
+                        Resend Email
+                    </button>
+
+                    <button onclick="handleLogout()" class="w-full text-xs text-gray-500 hover:text-white py-2">
+                        Sign Out / Use Different Email
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile-view" class="max-w-4xl mx-auto hidden pb-20">
+            <div class="text-center mb-10">
+                <h1 class="font-serif text-4xl mb-3 text-zenith-gold">Build Your Profile</h1>
+                <p class="text-gray-400">Zenith AI needs your details to curate the perfect wardrobe.</p>
+            </div>
+
+            <div class="flex justify-center mb-12 gap-4">
+                <div class="step-indicator w-3 h-3 rounded-full bg-zenith-gold" id="step-1-dot"></div>
+                <div class="step-indicator w-3 h-3 rounded-full bg-gray-600" id="step-2-dot"></div>
+                <div class="step-indicator w-3 h-3 rounded-full bg-gray-600" id="step-3-dot"></div>
+                <div class="step-indicator w-3 h-3 rounded-full bg-gray-600" id="step-4-dot"></div>
+            </div>
+
+            <form id="profile-wizard-form">
+                
+                <div id="wizard-step-1" class="wizard-step animate-fade-in">
+                    <h3 class="text-xl font-medium mb-6 text-center">Select Your Body Shape</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        </div>
+                    <div class="mt-10 flex justify-end">
+                        <button type="button" onclick="nextStep(2)" class="btn-primary px-8 py-3 rounded-lg flex items-center gap-2">
+                            Next <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="wizard-step-2" class="wizard-step hidden animate-fade-in">
+                    <h3 class="text-xl font-medium mb-6 text-center">Refine Your Attributes</h3>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="glass-panel p-6 rounded-xl">
+                            <label class="block text-sm uppercase tracking-widest text-zenith-gold mb-4">Body Subtype</label>
+                            <div class="space-y-3" id="subtype-options">
+                                </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-xl">
+                            <label class="block text-sm uppercase tracking-widest text-zenith-gold mb-4">Skin Undertone</label>
+                            <div class="grid grid-cols-3 gap-3" id="undertone-options">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 flex justify-between">
+                        <button type="button" onclick="nextStep(1)" class="text-gray-400 hover:text-white px-6 py-3">Back</button>
+                        <button type="button" onclick="nextStep(3)" class="btn-primary px-8 py-3 rounded-lg flex items-center gap-2">
+                            Next <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="wizard-step-3" class="wizard-step hidden animate-fade-in">
+                    <h3 class="text-xl font-medium mb-6 text-center">Select Your Exact Tone</h3>
+                    <p class="text-center text-gray-500 mb-8 text-sm">Select the shade that matches your jawline most closely.</p>
+                    
+                    <div class="glass-panel p-6 rounded-xl">
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 justify-items-center" id="skin-grid">
+                            </div>
+                    </div>
+
+                    <div class="mt-10 flex justify-between">
+                        <button type="button" onclick="nextStep(2)" class="text-gray-400 hover:text-white px-6 py-3">Back</button>
+                        <button type="button" onclick="nextStep(4)" class="btn-primary px-8 py-3 rounded-lg flex items-center gap-2">
+                            Next <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="wizard-step-4" class="wizard-step hidden animate-fade-in">
+                    <h3 class="text-xl font-medium mb-6 text-center">Choose Your Aesthetic</h3>
+                    <p class="text-center text-gray-500 mb-8 text-sm">Which style resonates with you the most?</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="style-grid">
+                        </div>
+
+                    <div class="mt-10 flex justify-between">
+                        <button type="button" onclick="nextStep(3)" class="text-gray-400 hover:text-white px-6 py-3">Back</button>
+                        <button type="submit" class="btn-primary px-10 py-3 rounded-lg flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                            <i class="ph-fill ph-sparkle"></i> Generate Curated Style
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section id="home-view" class="max-w-7xl mx-auto hidden pb-20">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-white/10 pb-6 gap-4">
+                <div>
+                    <h2 class="font-serif text-3xl mb-1">Your Curated Collection</h2>
+                    <p class="text-gray-400 text-sm">Based on: <span id="user-profile-summary" class="text-zenith-gold">Loading...</span></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="editProfile()" class="text-xs uppercase tracking-widest border border-white/20 px-4 py-2 rounded hover:bg-white/10 transition">Retake Analysis</button>
+                </div>
+            </div>
+
+            <div id="loading-clothes" class="hidden text-center py-20">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-12 w-12 mb-4 mx-auto"></div>
+                <p class="text-gray-400">Styling AI is analyzing matching products...</p>
+            </div>
+
+            <div id="no-clothes" class="hidden text-center py-20 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                <i class="ph-duotone ph-coat-hanger text-4xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400">Our database is being updated.</p>
+                <button onclick="seedDatabase()" class="mt-4 text-zenith-gold hover:underline text-sm">Refresh</button>
+            </div>
+
+            <div id="clothes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                </div>
+        </section>
+
+    </main>
+
+    <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-zenith-gray border border-white/10 p-6 rounded-xl max-w-sm w-full shadow-2xl">
+            <h3 id="modal-title" class="text-xl font-serif mb-2 text-zenith-gold">Notification</h3>
+            <p id="modal-msg" class="text-gray-300 mb-6">Message goes here.</p>
+            <button onclick="closeModal()" class="w-full bg-white/10 hover:bg-white/20 py-2 rounded transition">Close</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- 1. CONFIGURATION ---
+        const firebaseConfig = {
+    apiKey: "AIzaSyBFwk3K3PAxiqzjInqFZSD4_HBSYMvXNrA",
+    authDomain: "zenithbysb.firebaseapp.com",
+    projectId: "zenithbysb",
+    storageBucket: "zenithbysb.firebasestorage.app",
+    messagingSenderId: "171401998545",
+    appId: "1:171401998545:web:84fb47aef94cd0f86f15f0",
+    measurementId: "G-W430JBYZZF"
+  };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- 2. DATA MODELS ---
+        const SKIN_TONES = [
+            { id: 'vf1', hex: '#FDEFE4', group: 'Very Fair : Light' }, { id: 'vf2', hex: '#F8E0CF', group: 'Very Fair : Medium' }, { id: 'vf3', hex: '#F3D0BA', group: 'Very Fair : Dark' },
+            { id: 'fw1', hex: '#F4D6BB', group: 'Fair Wheatish : Light' }, { id: 'fw2', hex: '#EAC29A', group: 'Fair Wheatish : Light' }, { id: 'fw3', hex: '#D9A777', group: 'Fair Wheatish : Light' },
+            { id: 'lw1', hex: '#F6D2C2', group: 'Light Wheatish : Light' }, { id: 'lw2', hex: '#E9B294', group: 'Light Wheatish : Medium' }, { id: 'lw3', hex: '#C38368', group: 'Light Wheatish : Dark' },
+            { id: 'mw1', hex: '#CFA074', group: 'Medium Wheatish : Light' }, { id: 'mw2', hex: '#B57B52', group: 'Medium Wheatish : Medium' }, { id: 'mw3', hex: '#935A3D', group: 'Medium Wheatish : Dark' },
+            { id: 'lb1', hex: '#CFA27C', group: 'Light Brown : Light' }, { id: 'lb2', hex: '#BE9167', group: 'Light Brown : Medium' }, { id: 'lb3', hex: '#A88165', group: 'Light Brown : Dark' },
+            { id: 'mb1', hex: '#8C624C', group: 'Medium Brown : Light' }, { id: 'mb2', hex: '#70361C', group: 'Medium Brown : Medium' }, { id: 'mb3', hex: '#673E2F', group: 'Medium Brown : Dark' },
+            { id: 'db1', hex: '#583123', group: 'Deep Brown : light' }, { id: 'db2', hex: '#492816', group: 'Deep Brown : Medium' }, { id: 'db3', hex: '#321b0f', group: 'Deep Brown : Dark' }
+        ];
+
+        const BODY_SHAPES = [
+            { id: 'apple', label: 'Round/Apple', icon: 'ph-circle' },
+            { id: 'pear', label: 'Pearl/Triangle', icon: 'ph-triangle' },
+            { id: 'inverted', label: 'Inverted Triangle', icon: 'ph-triangle text-rotate-180' },
+            { id: 'rectangle', label: 'Rectangular', icon: 'ph-rectangle' },
+            { id: 'hourglass', label: 'Hourglass', icon: 'ph-hourglass' }
+        ];
+
+        const FASHION_STYLES = [
+            { id: 'old-money', label: 'Old Money', image: 'https://images.unsplash.com/photo-1561579837-703b7e147e34?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+            { id: 'tomboy', label: 'Tomboy', image: 'https://plus.unsplash.com/premium_photo-1727427850080-35a23c678211?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+            { id: 'baddie', label: 'Baddie', image: 'https://images.unsplash.com/photo-1763604996066-73160867c1fc?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+            { id: 'soft', label: 'Soft Aesthetic', image: 'https://images.unsplash.com/photo-1753192104212-14f586962222?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }
+        ];
+
+        // --- 3. STATE MANAGEMENT ---
+        let currentUser = null;
+        let userProfile = {};
+        
+        // --- 4. VIEW CONTROLLER ---
+        function showView(viewId) {
+            ['auth-view', 'verify-view', 'profile-view', 'home-view'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            if(viewId === 'auth-view' || viewId === 'verify-view') {
+                document.getElementById('nav-actions').classList.add('hidden');
+            } else {
+                document.getElementById('nav-actions').classList.remove('hidden');
+            }
+        }
+
+        // --- 5. AUTH LOGIC ---
+        const initAuth = async () => {
+            if (!auth.currentUser) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                     await signInWithCustomToken(auth, __initial_auth_token);
+                }
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user && !user.isAnonymous) {
+                await user.reload(); 
+                if (!user.emailVerified) {
+                    document.getElementById('verify-email-display').innerText = user.email;
+                    showView('verify-view');
+                    return;
+                }
+                await checkUserProfile(user.uid);
+            } else {
+                showView('auth-view');
+            }
+        });
+
+        window.resendVerificationEmail = async () => {
+            const btn = document.getElementById('btn-resend');
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+            try {
+                if(auth.currentUser) {
+                    await sendEmailVerification(auth.currentUser);
+                    showModal("Email Sent", "A new verification email has been sent to " + auth.currentUser.email);
+                }
+            } catch (e) {
+                showModal("Error", e.message);
+            } finally {
+                btn.innerText = "Sent!";
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 5000);
+            }
+        };
+
+        window.checkVerification = async () => {
+             if(auth.currentUser) {
+                 await auth.currentUser.reload();
+                 if(auth.currentUser.emailVerified) {
+                     await checkUserProfile(auth.currentUser.uid);
+                 } else {
+                     showModal("Not Verified Yet", "We haven't received the confirmation yet.");
+                 }
+             }
+        };
+
+        window.toggleAuthMode = (mode) => {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+            const title = document.getElementById('auth-title');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                tabLogin.classList.add('bg-zenith-gold', 'text-black');
+                tabLogin.classList.remove('text-gray-400');
+                tabReg.classList.remove('bg-zenith-gold', 'text-black');
+                tabReg.classList.add('text-gray-400');
+                title.textContent = "Welcome Back";
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                tabReg.classList.add('bg-zenith-gold', 'text-black');
+                tabReg.classList.remove('text-gray-400');
+                tabLogin.classList.remove('bg-zenith-gold', 'text-black');
+                tabLogin.classList.add('text-gray-400');
+                title.textContent = "Join Zenith";
+            }
+        };
+
+        // LOGIN HANDLER
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login-submit');
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            btn.innerHTML = `Processing...`;
+            btn.disabled = true;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (error) {
+                showModal("Login Failed", error.message);
+                btn.innerHTML = `Access Account`;
+                btn.disabled = false;
+            }
+        });
+
+        // REGISTER HANDLER
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-reg-submit');
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            const mobile = document.getElementById('reg-mobile').value;
+            btn.innerHTML = `Creating Account...`;
+            btn.disabled = true;
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await updateProfile(cred.user, { displayName: name });
+                await setDoc(doc(db, 'artifacts', appId, 'users', cred.user.uid, 'profile', 'info'), {
+                    name, mobile, email, createdAt: new Date().toISOString()
+                });
+                await sendEmailVerification(cred.user);
+            } catch (error) {
+                showModal("Registration Failed", error.message);
+                btn.innerHTML = `Create Account`;
+                btn.disabled = false;
+            }
+        });
+
+        window.handleLogout = () => {
+            signOut(auth);
+            userProfile = {};
+        };
+
+        // --- 6. PROFILE WIZARD LOGIC ---
+        function initWizardUI() {
+            // Shapes
+            const shapeContainer = document.querySelector('#wizard-step-1 .grid');
+            shapeContainer.innerHTML = BODY_SHAPES.map(shape => `
+                <div class="selection-card glass-panel rounded-xl p-4 flex flex-col items-center justify-center h-32 hover:bg-white/5" onclick="selectOption('shape', '${shape.id}', this)">
+                    <i class="ph-fill ${shape.icon} text-4xl mb-2 text-gray-300"></i>
+                    <span class="text-sm text-center font-medium">${shape.label}</span>
+                </div>
+            `).join('');
+
+            // Subtypes
+            const subContainer = document.getElementById('subtype-options');
+            subContainer.innerHTML = ['Skinny', 'Healthy', 'Plump'].map(type => `
+                <div class="selection-card glass-panel p-3 rounded-lg flex items-center justify-between px-4 hover:bg-white/5" onclick="selectOption('subtype', '${type}', this)">
+                    <span>${type}</span>
+                    <div class="w-4 h-4 rounded-full border border-gray-500 radio-indicator"></div>
+                </div>
+            `).join('');
+
+            // Undertones
+            const toneContainer = document.getElementById('undertone-options');
+            toneContainer.innerHTML = ['Cool', 'Neutral', 'Warm'].map(tone => `
+                <div class="selection-card glass-panel p-3 rounded-lg text-center hover:bg-white/5" onclick="selectOption('undertone', '${tone}', this)">
+                    ${tone}
+                </div>
+            `).join('');
+
+            // Skin Colors
+            const colorContainer = document.getElementById('skin-grid');
+            colorContainer.innerHTML = SKIN_TONES.map(tone => `
+                <div class="color-swatch w-12 h-12 rounded-full cursor-pointer shadow-lg relative group" 
+                     style="background-color: ${tone.hex};" 
+                     title="${tone.group}"
+                     data-group="${tone.group}"
+                     onclick="selectOption('skinColor', '${tone.hex}', this)">
+                     <div class="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+            `).join('');
+
+            // Styles (Step 4)
+            const styleContainer = document.getElementById('style-grid');
+            styleContainer.innerHTML = FASHION_STYLES.map(style => `
+                <div class="selection-card glass-panel rounded-xl overflow-hidden group" onclick="selectOption('style', '${style.id}', this)">
+                    <div class="h-40 overflow-hidden relative">
+                        <img src="${style.image}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 font-serif text-xl font-bold text-white z-10">${style.label}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        initWizardUI();
+
+        window.selectOption = (category, value, element) => {
+            userProfile[category] = value;
+            const container = element.parentElement;
+            
+            // Handle Skin Tone specific logic (Needs to save Group Name AND Hex)
+            if (category === 'skinColor') {
+                container.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+                element.classList.add('selected');
+                const groupName = element.getAttribute('data-group');
+                userProfile['skinGroup'] = groupName; // Save "Very Fair : Medium"
+            } else {
+                container.querySelectorAll('.selection-card').forEach(el => {
+                    el.classList.remove('selected');
+                    if(el.querySelector('.radio-indicator')) el.querySelector('.radio-indicator').classList.remove('bg-zenith-gold', 'border-zenith-gold');
+                });
+                element.classList.add('selected');
+                if(element.querySelector('.radio-indicator')) element.querySelector('.radio-indicator').classList.add('bg-zenith-gold', 'border-zenith-gold');
+            }
+        };
+
+        window.nextStep = (step) => {
+            if (step === 2 && !userProfile.shape) return showModal("Selection Required", "Please select a body shape.");
+            if (step === 3 && (!userProfile.subtype || !userProfile.undertone)) return showModal("Selection Required", "Please complete all selections.");
+            if (step === 4 && !userProfile.skinColor) return showModal("Selection Required", "Please select a skin tone.");
+
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`wizard-step-${step}`).classList.remove('hidden');
+            
+            for(let i=1; i<=4; i++) {
+                const dot = document.getElementById(`step-${i}-dot`);
+                if(i <= step) {
+                    dot.classList.remove('bg-gray-600');
+                    dot.classList.add('bg-zenith-gold');
+                } else {
+                    dot.classList.add('bg-gray-600');
+                    dot.classList.remove('bg-zenith-gold');
+                }
+            }
+        };
+
+        document.getElementById('profile-wizard-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userProfile.style) {
+                showModal("Selection Required", "Please select an aesthetic style.");
+                return;
+            }
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), userProfile);
+                loadHomePage();
+            } catch (error) {
+                showModal("Error", "Could not save profile. " + error.message);
+            }
+        });
+
+        async function checkUserProfile(uid) {
+            const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                userProfile = docSnap.data();
+                loadHomePage();
+            } else {
+                showView('profile-view');
+            }
+        }
+
+        async function loadHomePage() {
+            showView('home-view');
+            const styleLabel = FASHION_STYLES.find(s => s.id === userProfile.style)?.label || userProfile.style;
+            document.getElementById('user-profile-summary').innerText = `${userProfile.shape} • ${styleLabel}`;
+            fetchRecommendations();
+        }
+
+        window.editProfile = () => {
+            showView('profile-view');
+        };
+
+        async function fetchRecommendations() {
+            const grid = document.getElementById('clothes-grid');
+            const loading = document.getElementById('loading-clothes');
+            const noResults = document.getElementById('no-clothes');
+            
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            try {
+                const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'clothes'));
+                const recommendations = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const tags = item.tags;
+
+                    // 1. Shape Match
+                    const shapeMatch = tags.shapes.includes(userProfile.shape) || tags.shapes.includes('all');
+                    
+                    // 2. Undertone Match
+                    const toneMatch = tags.undertones.includes(userProfile.undertone) || tags.undertones.includes('Neutral');
+                    
+                    // 3. Style Match
+                    const styleMatch = tags.styles ? (tags.styles.includes(userProfile.style) || tags.styles.includes('all')) : true;
+
+                    // 4. Skin Color Match
+                    // Matches "Very Fair : Medium" etc.
+                    const skinMatch = tags.skinColors ? (tags.skinColors.includes(userProfile.skinGroup) || tags.skinColors.includes('all')) : true;
+
+                    if (shapeMatch && toneMatch && styleMatch && skinMatch) {
+                        // Calculate score simply for display
+                        item.matchScore = 100; // Perfect match
+                        recommendations.push(item);
+                    }
+                });
+
+                loading.classList.add('hidden');
+                if (recommendations.length === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    renderClothes(recommendations);
+                }
+            } catch (error) {
+                console.error("Error fetching clothes:", error);
+                loading.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                noResults.querySelector('p').innerText = "Error loading collection.";
+            }
+        }
+
+        function renderClothes(items) {
+            const grid = document.getElementById('clothes-grid');
+            
+            grid.innerHTML = items.map(item => {
+                const displayTags = [];
+
+                // 1. Check Style (Only show if item has the user's specific style)
+                if (item.tags.styles && item.tags.styles.includes(userProfile.style)) {
+                    displayTags.push(userProfile.style);
+                }
+
+                // 2. Check Shape (Only show if item has the user's specific shape)
+                if (item.tags.shapes && item.tags.shapes.includes(userProfile.shape)) {
+                    displayTags.push(userProfile.shape);
+                }
+
+                // 3. Check Undertone (Only show if item has the user's specific undertone)
+                if (item.tags.undertones && item.tags.undertones.includes(userProfile.undertone)) {
+                    displayTags.push(userProfile.undertone);
+                }
+
+                // 4. Check Skin Color (Added: Only show if item has the user's specific skin group)
+                if (item.tags.skinColors && item.tags.skinColors.includes(userProfile.skinGroup)) {
+                    displayTags.push(userProfile.skinGroup);
+                }
+
+                return `
+                <div class="group glass-panel rounded-xl overflow-hidden hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-2 right-2 bg-black/70 backdrop-blur text-white text-xs px-2 py-1 rounded">
+                            ${item.matchScore ? item.matchScore + '% Match' : 'Best Match'}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-serif text-lg text-white mb-1">${item.name}</h3>
+                        <p class="text-zenith-gold font-medium">&#8360; ${item.price}</p>
+                        
+                        <div class="mt-3 flex gap-2 flex-wrap">
+                             ${displayTags.length > 0 ? displayTags.map(tag => `
+                                <span class="text-[10px] uppercase tracking-wider bg-zenith-gold/10 text-zenith-gold border border-zenith-gold/20 px-2 py-1 rounded">
+                                    ${tag}
+                                </span>
+                             `).join('') : '<span class="text-[10px] text-gray-500 uppercase tracking-wider">Universal Match</span>'}
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.seedDatabase = async () => {
+            if(!currentUser) return;
+            const mockClothes = [
+                {
+                    name: "Vintage Tweed Set",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['hourglass', 'pear', 'rectangle'], 
+                        undertones: ['Cool', 'Neutral'], 
+                        skinColors: ['Very Fair : Light', 'Very Fair : Medium', 'Fair Wheatish : Light'],
+                        styles: ['old-money']
+                    }
+                },
+                {
+                    name: "Oversized Graphic Hoodie",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['inverted', 'rectangle', 'apple'], 
+                        undertones: ['Warm', 'Neutral', 'Cool'],
+                        skinColors: ['all'],
+                        styles: ['tomboy']
+                    }
+                },
+                {
+                    name: "Satin Slip Dress",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['hourglass', 'pear'], 
+                        undertones: ['Warm', 'Deep'],
+                        skinColors: ['Medium Brown : Light', 'Medium Brown : Dark', 'Deep Brown : Medium'],
+                        styles: ['baddie']
+                    }
+                },
+                {
+                    name: "Pastel Cardigan & Skirt",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['pear', 'hourglass'], 
+                        undertones: ['Cool', 'Neutral'],
+                        skinColors: ['Very Fair : Light', 'Light Wheatish : Light'],
+                        styles: ['soft']
+                    }
+                },
+                {
+                    name: "Classic Beige Trench",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['rectangle', 'hourglass'], 
+                        undertones: ['Warm', 'Neutral'],
+                        skinColors: ['all'],
+                        styles: ['old-money']
+                    }
+                },
+                {
+                    name: "Structured Corset Top",
+                    price: 999,
+                    image: "/images/outfit1.jpg",
+                    tags: { 
+                        shapes: ['inverted', 'hourglass'], 
+                        undertones: ['Cool', 'Warm', 'Neutral'],
+                        skinColors: ['all'],
+                        styles: ['baddie', 'tomboy']
+                    }
+                }
+            ];
+            const btn = document.querySelector('#no-clothes button');
+            const originalText = btn.innerText;
+            btn.innerText = "Populating...";
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'clothes');
+            try {
+                for (const item of mockClothes) {
+                    await setDoc(doc(colRef, item.name), item);
+                }
+                fetchRecommendations();
+            } catch(e) {
+                console.error(e);
+                btn.innerText = originalText;
+            }
+        };
+
+        window.showModal = (title, msg) => {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+        };
+
+    </script>
+</body>
+</html>
